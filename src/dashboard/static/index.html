@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trading Intelligence Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0e17;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --border: #1e2d45;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .logo span { color: var(--blue); }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .yellow { color: var(--yellow); }
+    .blue { color: var(--blue); }
+    .muted { color: var(--muted); }
+
+    /* Market Overview */
+    .asset-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .asset-row:last-child { border-bottom: none; }
+
+    .asset-name {
+      font-weight: 700;
+      font-size: 14px;
+      width: 80px;
+    }
+
+    .asset-price {
+      font-size: 15px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-trending { background: rgba(16,185,129,0.15); color: var(--green); }
+    .badge-ranging  { background: rgba(245,158,11,0.15); color: var(--yellow); }
+    .badge-volatile { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-long     { background: rgba(16,185,129,0.15); color: var(--green); }
+    .badge-short    { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .badge-neutral  { background: rgba(100,116,139,0.15); color: var(--muted); }
+
+    .indicators {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .ind {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .ind strong { color: var(--text); }
+
+    /* Signals */
+    .signal-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 3px solid transparent;
+    }
+
+    .signal-card.long  { border-left-color: var(--green); }
+    .signal-card.short { border-left-color: var(--red); }
+
+    .signal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .signal-asset {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .signal-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .signal-field label {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .signal-field span {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .score-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+      transition: width 0.5s ease;
+    }
+
+    .confluence {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .conf-tag {
+      background: rgba(59,130,246,0.1);
+      color: var(--blue);
+      border: 1px solid rgba(59,130,246,0.2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
+    .reasoning {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    /* Scan button */
+    .btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 0;
+      font-size: 13px;
+    }
+
+    .refresh-info {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .loading {
+      color: var(--muted);
+      font-size: 12px;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    .error-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: var(--red);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Trading<span>AI</span></div>
+  <div class="header-right">
+    <span><span class="status-dot"></span><span id="status-text">Connecting...</span></span>
+    <span id="last-scan" class="muted"></span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Stats Row -->
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Total Signals Today</div>
+      <div class="stat-value blue" id="stat-signals">—</div>
+      <div class="stat-sub">Approved setups</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Journal Win Rate</div>
+      <div class="stat-value green" id="stat-winrate">—</div>
+      <div class="stat-sub" id="stat-trades">No closed trades yet</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Total P&L (R)</div>
+      <div class="stat-value" id="stat-pnl">—</div>
+      <div class="stat-sub" id="stat-expectancy"></div>
+    </div>
+  </div>
+
+  <!-- Market + Signals -->
+  <div class="grid-2">
+
+    <!-- Market Overview -->
+    <div class="card">
+      <div class="card-title">
+        Market Overview
+        <span class="refresh-info" id="market-updated"></span>
+      </div>
+      <div id="market-content"><div class="loading">Loading market data...</div></div>
+    </div>
+
+    <!-- Active Signals -->
+    <div class="card">
+      <div class="card-title">
+        Active Signals
+        <button class="btn" id="scan-btn" onclick="triggerScan()">Scan Now</button>
+      </div>
+      <div id="signals-content"><div class="loading">Loading signals...</div></div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+const API = '';
+
+async function fetchStatus() {
+  try {
+    const r = await fetch(`${API}/api/status`);
+    const d = await r.json();
+    document.getElementById('status-text').textContent = d.scanner_active ? 'Scanner Active' : 'Connected';
+    if (d.last_scan) {
+      const dt = new Date(d.last_scan);
+      document.getElementById('last-scan').textContent = 'Last scan: ' + dt.toLocaleTimeString();
+    }
+  } catch(e) {
+    document.getElementById('status-text').textContent = 'Connection error';
+  }
+}
+
+async function fetchMarket() {
+  try {
+    const r = await fetch(`${API}/api/market`);
+    const data = await r.json();
+
+    const html = data.map(asset => {
+      if (asset.error) return `<div class="asset-row"><span class="asset-name">${asset.symbol}</span><span class="muted">Error: ${asset.error}</span></div>`;
+
+      const trend = asset.trend || 'NEUTRAL';
+      const trendColor = trend === 'BULLISH' ? 'green' : trend === 'BEARISH' ? 'red' : 'muted';
+      const regimeClass = (asset.regime || '').toLowerCase();
+
+      return `
+        <div class="asset-row">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              <span class="asset-name">${asset.symbol.replace('USDT','')}</span>
+              <span class="asset-price">$${Number(asset.current_price).toLocaleString()}</span>
+              <span class="badge badge-${regimeClass}">${asset.regime}</span>
+              <span class="${trendColor}" style="font-size:11px;font-weight:600">${trend}</span>
+            </div>
+            <div class="indicators">
+              <span class="ind">ADX <strong>${asset.adx}</strong></span>
+              <span class="ind">RSI <strong class="${asset.rsi < 35 ? 'green' : asset.rsi > 65 ? 'red' : ''}">${asset.rsi}</strong></span>
+              <span class="ind">ATR <strong>${asset.atr_ratio}x</strong></span>
+              <span class="ind">Vol <strong>${asset.volume_ratio}x</strong></span>
+              <span class="ind">Struct <strong>${asset.market_structure}</strong></span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('market-content').innerHTML = html || '<div class="empty">No market data</div>';
+    document.getElementById('market-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    document.getElementById('market-content').innerHTML = `<div class="error-msg">Failed to load market data: ${e.message}</div>`;
+  }
+}
+
+async function fetchSignals() {
+  try {
+    const r = await fetch(`${API}/api/signals?approved_only=true&limit=10`);
+    const signals = await r.json();
+
+    document.getElementById('stat-signals').textContent = signals.length;
+
+    if (!signals.length) {
+      document.getElementById('signals-content').innerHTML = `
+        <div class="empty">
+          No approved signals yet.<br>
+          <span style="font-size:11px;margin-top:4px;display:block">Click "Scan Now" to run an analysis.</span>
+        </div>`;
+      return;
+    }
+
+    const html = signals.map(s => {
+      const dir = s.direction.toLowerCase();
+      const tps = s.take_profit || [];
+      const score = s.score || 0;
+      const time = s.created_at ? new Date(s.created_at).toLocaleString() : '';
+
+      return `
+        <div class="signal-card ${dir}">
+          <div class="signal-header">
+            <div>
+              <span class="signal-asset">${s.asset}</span>
+              <span class="badge badge-${dir}" style="margin-left:8px">${s.direction}</span>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:13px;font-weight:700">${score.toFixed(1)}<span class="muted">/100</span></div>
+              <div class="score-bar"><div class="score-fill" style="width:${score}%"></div></div>
+            </div>
+          </div>
+
+          <div class="signal-meta">
+            <div class="signal-field">
+              <label>Entry</label>
+              <span>${Number(s.entry).toLocaleString()}</span>
+            </div>
+            <div class="signal-field">
+              <label>Stop Loss</label>
+              <span class="red">${Number(s.stop_loss).toLocaleString()}</span>
+            </div>
+            <div class="signal-field">
+              <label>R/R</label>
+              <span class="green">${s.risk_reward}:1</span>
+            </div>
+            <div class="signal-field">
+              <label>TP1</label>
+              <span class="green">${tps[0] ? Number(tps[0]).toLocaleString() : '—'}</span>
+            </div>
+            <div class="signal-field">
+              <label>TP2</label>
+              <span class="green">${tps[1] ? Number(tps[1]).toLocaleString() : '—'}</span>
+            </div>
+            <div class="signal-field">
+              <label>Confidence</label>
+              <span>${(s.confidence * 100).toFixed(0)}%</span>
+            </div>
+          </div>
+
+          ${s.confluence_factors?.length ? `
+          <div class="confluence">
+            ${s.confluence_factors.map(f => `<span class="conf-tag">${f}</span>`).join('')}
+          </div>` : ''}
+
+          ${s.reasoning ? `<div class="reasoning">${s.reasoning.substring(0, 250)}${s.reasoning.length > 250 ? '...' : ''}</div>` : ''}
+
+          <div style="margin-top:8px;font-size:10px;color:var(--muted)">${time} • ${s.market_regime} • ${s.timeframe?.toUpperCase()}</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('signals-content').innerHTML = html;
+  } catch(e) {
+    document.getElementById('signals-content').innerHTML = `<div class="error-msg">Failed to load signals: ${e.message}</div>`;
+  }
+}
+
+async function fetchJournal() {
+  try {
+    const r = await fetch(`${API}/api/journal/stats`);
+    const stats = await r.json();
+
+    if (!stats.total_trades) return;
+
+    document.getElementById('stat-winrate').textContent = (stats.win_rate * 100).toFixed(1) + '%';
+    document.getElementById('stat-trades').textContent = stats.total_trades + ' closed trades';
+
+    const pnl = stats.total_r;
+    const pnlEl = document.getElementById('stat-pnl');
+    pnlEl.textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + 'R';
+    pnlEl.className = 'stat-value ' + (pnl >= 0 ? 'green' : 'red');
+    document.getElementById('stat-expectancy').textContent = `Expectancy: ${stats.expectancy.toFixed(3)}R`;
+  } catch(e) {}
+}
+
+async function triggerScan() {
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  btn.textContent = 'Scanning...';
+
+  try {
+    const r = await fetch(`${API}/api/scan`, { method: 'POST' });
+    const d = await r.json();
+    await fetchSignals();
+    btn.textContent = `Done (${d.approved_signals} signals)`;
+    setTimeout(() => { btn.textContent = 'Scan Now'; btn.disabled = false; }, 3000);
+  } catch(e) {
+    btn.textContent = 'Error';
+    setTimeout(() => { btn.textContent = 'Scan Now'; btn.disabled = false; }, 2000);
+  }
+}
+
+async function refresh() {
+  await Promise.all([fetchStatus(), fetchMarket(), fetchSignals(), fetchJournal()]);
+}
+
+refresh();
+setInterval(refresh, 60 * 1000); // Refresh every minute
+</script>
+</body>
+</html>
