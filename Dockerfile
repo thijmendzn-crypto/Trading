@@ -14,4 +14,6 @@ RUN mkdir -p data
 
 EXPOSE 8000
 
+ENV PYTHONPATH=/app
+
 CMD ["uvicorn", "src.dashboard.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
