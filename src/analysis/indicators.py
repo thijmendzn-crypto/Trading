@@ -71,6 +71,17 @@ def vwap(df: pd.DataFrame) -> pd.Series:
 
 
 def volume_ratio(df: pd.DataFrame, period: int = 20) -> pd.Series:
-    """Current volume vs SMA of volume."""
-    avg_vol = sma(df["volume"], period)
-    return df["volume"] / avg_vol.replace(0, np.nan)
+    """
+    Volume of last CLOSED candle vs SMA of previous closed candles.
+    Excludes the current (live/incomplete) candle to avoid false low readings.
+    """
+    # Use iloc[:-1] to exclude the current live candle, then take last value
+    closed = df.iloc[:-1]
+    avg_vol = sma(closed["volume"], period)
+    last_closed_vol = closed["volume"].iloc[-1]
+    last_avg = avg_vol.iloc[-1]
+    # Return as Series aligned to df index, last value = ratio
+    ratio = df["volume"] / sma(df["volume"], period).replace(0, np.nan)
+    if last_avg > 0:
+        ratio.iloc[-1] = last_closed_vol / last_avg
+    return ratio
